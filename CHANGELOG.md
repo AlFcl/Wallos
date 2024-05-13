@@ -1,5 +1,59 @@
 # Changelog
 
+## [1.27.0](https://github.com/ellite/Wallos/compare/v1.26.2...v1.27.0) (2024-05-11)
+
+
+### Features
+
+* add korean translation ([#314](https://github.com/ellite/Wallos/issues/314)) ([bc40320](https://github.com/ellite/Wallos/commit/bc403206905b39c3aa88f3eb51e59b41e2a5e24e))
+
+## [1.26.2](https://github.com/ellite/Wallos/compare/v1.26.1...v1.26.2) (2024-05-09)
+
+
+### Bug Fixes
+
+* russian translations ([#309](https://github.com/ellite/Wallos/issues/309)) ([8f890fc](https://github.com/ellite/Wallos/commit/8f890fc5d3a62a91feec50564179b3241ed538bf))
+
+## [1.26.1](https://github.com/ellite/Wallos/compare/v1.26.0...v1.26.1) (2024-05-09)
+
+
+### Bug Fixes
+
+* background removal experimental setting ([#307](https://github.com/ellite/Wallos/issues/307)) ([bb5ee2e](https://github.com/ellite/Wallos/commit/bb5ee2e64c11b1415da3aa50119dfaa3783be37f))
+
+## [1.26.0](https://github.com/ellite/Wallos/compare/v1.25.1...v1.26.0) (2024-05-08)
+
+
+### Features
+
+* add russian translation ([#305](https://github.com/ellite/Wallos/issues/305)) ([ae04d50](https://github.com/ellite/Wallos/commit/ae04d50329c1fb0117e186f89fef38b495cbbe9c))
+
+## [1.25.1](https://github.com/ellite/Wallos/compare/v1.25.0...v1.25.1) (2024-05-07)
+
+
+### Bug Fixes
+
+* broken discord form ([#302](https://github.com/ellite/Wallos/issues/302)) ([b435d6a](https://github.com/ellite/Wallos/commit/b435d6a5cf6f80404c487b519334b2854aab9713))
+
+## [1.25.0](https://github.com/ellite/Wallos/compare/v1.24.0...v1.25.0) (2024-05-06)
+
+
+### Features
+
+* add discord and pushover as notification agents ([#300](https://github.com/ellite/Wallos/issues/300)) ([8994829](https://github.com/ellite/Wallos/commit/899482982e7e200f5a7081ed6285475e5cb2a37d))
+
+
+### Bug Fixes
+
+* most error messages of the notifications endpoints would not reach the frontend ([8994829](https://github.com/ellite/Wallos/commit/899482982e7e200f5a7081ed6285475e5cb2a37d))
+
+## [1.24.0](https://github.com/ellite/Wallos/compare/v1.23.0...v1.24.0) (2024-05-05)
+
+
+### Features
+
+* add new notification methods (telegram, webhooks, gotify) ([#295](https://github.com/ellite/Wallos/issues/295)) ([a408031](https://github.com/ellite/Wallos/commit/a408031ef8711bf87e9f8db35f52c498f250b235))
+
 ## [1.23.0](https://github.com/ellite/Wallos/compare/v1.22.0...v1.23.0) (2024-04-26)
 
 
