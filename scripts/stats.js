@@ -21,10 +21,74 @@ function loadGraph(container, dataPoints, currency, run) {
                     animateRotate: true,
                     animateScale: true,
                 },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = " ";
+                                if (currency) {
+                                    label += new Intl.NumberFormat(navigator.language, { style: 'currency', currency }).format(context.raw);
+                                } else {
+                                    label += new Intl.NumberFormat(navigator.language).format(context.raw);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
             },
         });
     }
 }
+
+function loadLineGraph(container, dataPoints, currency, run) {
+    if (run) {
+        var ctx = document.getElementById(container).getContext('2d');
+
+        var chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: '',
+                    data: dataPoints.map(point => point.y),
+                }],
+                labels: dataPoints.map(point => {
+                    return `${point.label}`;
+                }),
+            },
+            options: {
+                animation: {
+                    animateRotate: true,
+                    animateScale: true,
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: {
+                            callback: function(value, index, values) {
+                                if (currency) {
+                                    return new Intl.NumberFormat(navigator.language, { style: 'currency', currency }).format(value);
+                                } else {
+                                    return new Intl.NumberFormat(navigator.language).format(value);
+                                }
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+}
+
 
 function closeSubMenus() {
     var subMenus = document.querySelectorAll('.filtermenu-submenu-content');
@@ -67,46 +131,31 @@ function toggleSubMenu(subMenu) {
 
 document.querySelectorAll('.filter-item').forEach(function(item) {
   item.addEventListener('click', function(e) {
+    const urlParams = new URLSearchParams(window.location.search);
+    let newUrl = 'stats.php?';
+
     if (this.hasAttribute('data-categoryid')) {
         const categoryId = this.getAttribute('data-categoryid');
-        const urlParams = new URLSearchParams(window.location.search);
-        let newUrl = 'stats.php?';
-
-        if (urlParams.get('category') === categoryId) {
-            urlParams.delete('category');
-        } else {
-            urlParams.set('category', categoryId);
-        }
-
-        newUrl += urlParams.toString();
-        window.location.href = newUrl;
+        const current = urlParams.get('category') ? urlParams.get('category').split(',') : [];
+        const idx = current.indexOf(categoryId);
+        if (idx !== -1) { current.splice(idx, 1); } else { current.push(categoryId); }
+        current.length ? urlParams.set('category', current.join(',')) : urlParams.delete('category');
     } else if (this.hasAttribute('data-memberid')) {
         const memberId = this.getAttribute('data-memberid');
-        const urlParams = new URLSearchParams(window.location.search);
-        let newUrl = 'stats.php?';
-
-        if (urlParams.get('member') === memberId) {
-            urlParams.delete('member');
-        } else {
-            urlParams.set('member', memberId);
-        }
-
-        newUrl += urlParams.toString();
-        window.location.href = newUrl;
+        const current = urlParams.get('member') ? urlParams.get('member').split(',') : [];
+        const idx = current.indexOf(memberId);
+        if (idx !== -1) { current.splice(idx, 1); } else { current.push(memberId); }
+        current.length ? urlParams.set('member', current.join(',')) : urlParams.delete('member');
     } else if (this.hasAttribute('data-paymentid')) {
         const paymentId = this.getAttribute('data-paymentid');
-        const urlParams = new URLSearchParams(window.location.search);
-        let newUrl = 'stats.php?';
-
-        if (urlParams.get('payment') === paymentId) {
-            urlParams.delete('payment');
-        } else {
-            urlParams.set('payment', paymentId);
-        }
-
-        newUrl += urlParams.toString();
-        window.location.href = newUrl;
+        const current = urlParams.get('payment') ? urlParams.get('payment').split(',') : [];
+        const idx = current.indexOf(paymentId);
+        if (idx !== -1) { current.splice(idx, 1); } else { current.push(paymentId); }
+        current.length ? urlParams.set('payment', current.join(',')) : urlParams.delete('payment');
     }
+
+    newUrl += urlParams.toString();
+    window.location.href = newUrl;
   });
 });
 

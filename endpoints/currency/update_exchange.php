@@ -1,13 +1,16 @@
 <?php
 require_once '../../includes/connect_endpoint.php';
+require_once '../../includes/validate_endpoint.php';
 
 $shouldUpdate = true;
 
-if (isset($_GET['force']) && $_GET['force'] === "true") {
+if (isset($_POST['force']) && $_POST['force'] === "true") {
     $shouldUpdate = true;
 } else {
-    $query = "SELECT date FROM last_exchange_update";
-    $result = $db->querySingle($query);
+    $query = "SELECT date FROM last_exchange_update WHERE user_id = :userId";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+    $result = $stmt->execute();
 
     if ($result) {
         $lastUpdateDate = new DateTime($result);
@@ -16,32 +19,37 @@ if (isset($_GET['force']) && $_GET['force'] === "true") {
         $currentDateString = $currentDate->format('Y-m-d');
         $shouldUpdate = $lastUpdateDateString < $currentDateString;
     }
-    
+
     if (!$shouldUpdate) {
         echo "Rates are current, no need to update.";
         exit;
     }
 }
 
-$query = "SELECT api_key, provider FROM fixer";
-$result = $db->query($query);
+$query = "SELECT api_key, provider FROM fixer WHERE user_id = :userId";
+$stmt = $db->prepare($query);
+$stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$result = $stmt->execute();
 
 if ($result) {
     $row = $result->fetchArray(SQLITE3_ASSOC);
-    
+
     if ($row) {
         $apiKey = $row['api_key'];
         $provider = $row['provider'];
 
         $codes = "";
-        $query = "SELECT id, name, symbol, code FROM currencies";
-        $result = $db->query($query);
+        $query = "SELECT id, name, symbol, code FROM currencies WHERE user_id = :userId";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $result = $stmt->execute();
         while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-            $codes .= $row['code'].",";
+            $codes .= $row['code'] . ",";
         }
         $codes = rtrim($codes, ',');
-        $query = "SELECT u.main_currency, c.code FROM user u LEFT JOIN currencies c ON u.main_currency = c.id WHERE u.id = 1";
+        $query = "SELECT u.main_currency, c.code FROM user u LEFT JOIN currencies c ON u.main_currency = c.id WHERE u.id = :userId";
         $stmt = $db->prepare($query);
+        $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
         $result = $stmt->execute();
         $row = $result->fetchArray(SQLITE3_ASSOC);
         $mainCurrencyCode = $row['code'];
@@ -57,7 +65,7 @@ if ($result) {
             ]);
             $response = file_get_contents($api_url, false, $context);
         } else {
-            $api_url = "http://data.fixer.io/api/latest?access_key=". $apiKey . "&base=EUR&symbols=" . $codes;
+            $api_url = "http://data.fixer.io/api/latest?access_key=" . $apiKey . "&base=EUR&symbols=" . $codes;
             $response = file_get_contents($api_url);
         }
 
@@ -72,10 +80,11 @@ if ($result) {
                 } else {
                     $exchangeRate = $rate / $mainCurrencyToEUR;
                 }
-                $updateQuery = "UPDATE currencies SET rate = :rate WHERE code = :code";
+                $updateQuery = "UPDATE currencies SET rate = :rate WHERE code = :code AND user_id = :userId";
                 $updateStmt = $db->prepare($updateQuery);
                 $updateStmt->bindParam(':rate', $exchangeRate, SQLITE3_TEXT);
                 $updateStmt->bindParam(':code', $currencyCode, SQLITE3_TEXT);
+                $updateStmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
                 $updateResult = $updateStmt->execute();
 
                 if (!$updateResult) {
@@ -85,14 +94,11 @@ if ($result) {
             $currentDate = new DateTime();
             $formattedDate = $currentDate->format('Y-m-d');
 
-            $deleteQuery = "DELETE FROM last_exchange_update";
-            $deleteStmt = $db->prepare($deleteQuery);
-            $deleteResult = $deleteStmt->execute();
-
-            $query = "INSERT INTO last_exchange_update (date) VALUES (:formattedDate)";
-            $stmt = $db->prepare($query);
-            $stmt->bindParam(':formattedDate', $formattedDate, SQLITE3_TEXT);
-            $result = $stmt->execute();
+            $updateQuery = "UPDATE last_exchange_update SET date = :formattedDate WHERE user_id = :userId";
+            $updateStmt = $db->prepare($updateQuery);
+            $updateStmt->bindParam(':formattedDate', $formattedDate, SQLITE3_TEXT);
+            $updateStmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+            $updateResult = $updateStmt->execute();
 
             $db->close();
             echo "Rates updated successfully!";
@@ -105,4 +111,3 @@ if ($result) {
     echo "Exchange rates update skipped. No fixer.io api key provided";
     $apiKey = null;
 }
-?>
